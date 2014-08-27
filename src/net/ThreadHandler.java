@@ -11,10 +11,10 @@ import java.net.UnknownHostException;
 public class ThreadHandler extends Thread {
 
 	Socket client = null;
-
-	public ThreadHandler(Socket c) {
+	CacheHash cache;
+	public ThreadHandler(Socket c, CacheHash cache) {
 		this.client = c;
-
+		this.cache = cache;
 	}
 	public void run() {
 		Socket server = null;
@@ -35,39 +35,63 @@ public class ThreadHandler extends Thread {
 			System.out.println("Error reading request from client: " + e);
 			return;
 		}
-		/* Send request to server */
-		try {
-			/* Open socket and write request to socket */
-			server = new Socket(request.getHost(), request.getPort());
-			DataOutputStream toServer = new DataOutputStream(server.getOutputStream());
-			toServer.writeBytes(request.toString());
-			/* Fill in */
-		} catch (UnknownHostException e) {
-			System.out.println("Unknown host: " + request.getHost());
-			System.out.println(e);
-			return;
-		} catch (IOException e) {
-			System.out.println("Error writing request to server: " + e);
-			return;
+
+		/* Before send the request to the server, check cache */
+		if(cache.existsRequest(request)) {
+			try {
+				response = cache.getResponse(request);
+				DataOutputStream toClient = new DataOutputStream(client.getOutputStream());
+				toClient.write(response.toString().getBytes());
+				toClient.write(response.body);
+				System.out.print("[FROM CACHE] ");
+				
+				System.out.println(response.log(request.URI, client.getLocalAddress()));
+				
+				client.close();
+			}catch(IOException e) {
+				System.out.println("Error writing response to client: " + e);
+			}
+		} else {
+			try {
+				/* Send request to server */
+				/* Open socket and write request to socket */
+				server = new Socket(request.getHost(), request.getPort());
+				DataOutputStream toServer = new DataOutputStream(server.getOutputStream());
+				toServer.writeBytes(request.toString());
+
+			} catch (UnknownHostException e) {
+				System.out.println("Unknown host: " + request.getHost());
+				System.out.println(e);
+				return;
+			} catch (IOException e) {
+				System.out.println("Error writing request to server: " + e);
+				return;
+			}
+			/* Read response and forward it to client */
+			try {
+				DataInputStream fromServer = new DataInputStream(server.getInputStream());
+				response = new HttpResponse(fromServer);
+				DataOutputStream toClient = new DataOutputStream(client.getOutputStream());
+				toClient.write(response.toString().getBytes());
+				toClient.write(response.body);
+				/* Write response to client. First headers, then body */
+				System.out.println(response.log(request.URI, client.getInetAddress()));
+				
+				client.close();
+				server.close();
+
+				// Add request and response on cache
+				cache.add(request, response);
+				System.out.println("[CACHE] Added stuff to cache, current cache size "+cache.getSizeInMB()+ " MB");
+			} catch (IOException e) {
+				System.out.println("Error writing response to client: " + e);
+			}
 		}
-		/* Read response and forward it to client */
-		try {
-			DataInputStream fromServer = new DataInputStream(server.getInputStream());
-			response = new HttpResponse(fromServer);
-			DataOutputStream toClient = new DataOutputStream(client.getOutputStream());
-			toClient.write(response.toString().getBytes());
-			toClient.write(response.body);
-			/* Write response to client. First headers, then body */
-			System.out.println(response.log(request.URI));
-			
-			client.close();
-			server.close();
-			/* Insert object into the cache */
-			/* Fill in (optional exercise only) */
-		} catch (IOException e) {
-			System.out.println("Error writing response to client: " + e);
-		}
+		System.out.println();
+
 	}
+
+
 
 
 }

@@ -139,11 +139,11 @@ public class HttpResponse {
 	}
 	
 	public double getContentStored() {
-		return (float)this.body.length/1000;
+		return (float)this.body.length;
 	}
 	
-	public String log(String uri) {
-		return String.format("[RESPONSE] to URI %s Last modified in: %s ETag: %s Content stored: %.2f KB", uri, lastModified == ""? "not determined" :  lastModified,etag == ""? "not determined" : etag, getContentStored());
+	public String log(String uri, InetAddress inetAddress) {
+		return String.format("[RESPONSE] to client %s URI %s Last modified in: %s ETag: %s Content stored: %.2f KB", inetAddress.getHostAddress(), uri, lastModified == ""? "not determined" :  lastModified,etag == ""? "not determined" : etag, getContentStored()/1000);
 
 	}
 	

@@ -16,6 +16,8 @@ public class ProxyCache {
 	private static int port;
 	/** Socket for client connections */
 	private static ServerSocket socket;
+	
+	private CacheHash cache = new CacheHash();
 
 	/** Create the ProxyCache object and the socket */
 	public static void init(int p) {
@@ -46,7 +48,9 @@ public class ProxyCache {
 			System.out.println("Error reading request from client: " + e);
 			return;
 		}
-		/* Send request to server */
+		
+		
+		
 		try {
 			/* Open socket and write request to socket */
 			server = new Socket(request.getHost(), request.getPort());
@@ -70,7 +74,7 @@ public class ProxyCache {
 			toClient.write(response.toString().getBytes());
 			toClient.write(response.body);
 			/* Write response to client. First headers, then body */
-			System.out.println(response.log(request.URI));
+//			System.out.println(response.log(request.URI));
 
 			client.close();
 			server.close();
@@ -84,10 +88,10 @@ public class ProxyCache {
 
 	/** Read command line arguments and start proxy */
 	public static void main(String args[]) {
+		ProxyCache proxyCache = new ProxyCache();
 		int myPort = 0;
 
 		try {
-//			myPort = Integer.parseInt(args[0]);
 			myPort = 8888;
 		} catch (ArrayIndexOutOfBoundsException e) {
 			System.out.println("Need port number as argument");
@@ -107,7 +111,7 @@ public class ProxyCache {
 			try {
 				client = socket.accept();
 //				handle(client);
-				ThreadHandler thread = new ThreadHandler(client);
+				ThreadHandler thread = new ThreadHandler(client, proxyCache.cache);
 				thread.start();
 			
 			
