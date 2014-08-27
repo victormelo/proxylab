@@ -1,4 +1,4 @@
-package proxylab;
+package net;
 /**
  * HttpRequest - HTTP request container and parser
  *

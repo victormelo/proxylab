@@ -1,4 +1,4 @@
-package proxylab;
+package net;
 /**
  * HttpResponse - Handle HTTP replies
  *
