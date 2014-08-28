@@ -1,15 +1,20 @@
 package net;
+
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
 /**
  * ProxyCache.java - Simple caching proxy
  *
  * $Id: ProxyCache.java,v 1.3 2004/02/16 15:22:00 kangasha Exp $
  *
  */
-
-import java.net.*;
-import java.io.*;
-import java.util.*;
-
 
 public class ProxyCache {
 	/** Port for the proxy */
@@ -102,15 +107,18 @@ public class ProxyCache {
 		}
 
 		init(myPort);
-
+		System.out.println("[STARTED] on port: " +socket.getLocalPort());
 		/** Main loop. Listen for incoming connections and spawn a new
 		 * thread for handling them */
 		Socket client = null;
 		
 		while (true) {
 			try {
+				
 				client = socket.accept();
+				
 //				handle(client);
+				
 				ThreadHandler thread = new ThreadHandler(client, proxyCache.cache);
 				thread.start();
 			

@@ -12,6 +12,8 @@ public class ThreadHandler extends Thread {
 
 	Socket client = null;
 	CacheHash cache;
+	final static String CRLF = "\r\n";
+	
 	public ThreadHandler(Socket c, CacheHash cache) {
 		this.client = c;
 		this.cache = cache;
@@ -70,18 +72,32 @@ public class ThreadHandler extends Thread {
 			try {
 				DataInputStream fromServer = new DataInputStream(server.getInputStream());
 				response = new HttpResponse(fromServer);
+				
 				DataOutputStream toClient = new DataOutputStream(client.getOutputStream());
-				toClient.write(response.toString().getBytes());
-				toClient.write(response.body);
-				/* Write response to client. First headers, then body */
-				System.out.println(response.log(request.URI, client.getInetAddress()));
+				if(!response.notFound) {
+					System.out.println(response.toString());
+					System.out.println(response.body.toString());
+					toClient.write(response.toString().getBytes());
+					toClient.write(response.body);
+					/* Write response to client. First headers, then body */
+					System.out.println(response.log(request.URI, client.getInetAddress()));
+					
+					// Add request and response to cache
+					cache.add(request, response);
+					System.out.println("[CACHE] Added stuff to cache, current cache size "+cache.getSizeInMB()+ " MB");
+				} else {
+					String propaganda = "HTTP/1.1 200 OK\n"
+										+ "Date: Thu, 28 Aug 2014 15:03:36 GMT\n"
+										+ "Server: Apache\n"
+										+ "Vary: Accept-Encoding\n"
+										+ "Connection: close\n"
+										+ "Content-Type: text/html\n"
+										+CRLF+"<html><body>Propaganda criada pelo proxy!</body></html>";
+					toClient.write(propaganda.getBytes());
+				}
 				
 				client.close();
 				server.close();
-
-				// Add request and response on cache
-				cache.add(request, response);
-				System.out.println("[CACHE] Added stuff to cache, current cache size "+cache.getSizeInMB()+ " MB");
 			} catch (IOException e) {
 				System.out.println("Error writing response to client: " + e);
 			}

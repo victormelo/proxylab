@@ -1,14 +1,15 @@
 package net;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+
 /**
  * HttpResponse - Handle HTTP replies
  *
  * $Id: HttpResponse.java,v 1.2 2003/11/26 18:12:42 kangasha Exp $
  *
  */
-
-import java.io.*;
-import java.net.*;
-import java.util.*;
 
 public class HttpResponse {
 	final static String CRLF = "\r\n";
@@ -17,6 +18,8 @@ public class HttpResponse {
 	/** Maximum size of objects that this proxy can handle. For the
 	 * moment set to 100 KB. You can adjust this as needed. */
 	final static int MAX_OBJECT_SIZE = 100000;
+	final static String STATUS_NOT_FOUND = "HTTP/1.1 404 Not Found";
+	final static String STATUS_OK = "HTTP/1.1 200 OK";
 	/** Reply status and headers */
 	String version;
 	int status;
@@ -24,6 +27,7 @@ public class HttpResponse {
 	String lastModified ="";
 	String etag ="";
 	String headers = "";
+	boolean notFound= false;
 	/* Body of reply */
 	byte[] body;
 
@@ -40,6 +44,12 @@ public class HttpResponse {
 			while (ler) {
 				if (!gotStatusLine) {
 					statusLine = line;
+					if(statusLine.equals(STATUS_NOT_FOUND)) {
+						statusLine = STATUS_OK;
+						notFound = true;
+						break;
+					}
+					System.out.println(statusLine);
 					gotStatusLine = true;
 				} else {
 					headers += line + CRLF;

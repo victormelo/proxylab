@@ -1,4 +1,8 @@
 package net;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+
 /**
  * HttpRequest - HTTP request container and parser
  *
@@ -6,9 +10,6 @@ package net;
  *
  */
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
 
 public class HttpRequest {
 	/** Help variables */
