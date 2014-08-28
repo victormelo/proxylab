@@ -43,9 +43,8 @@ public class ThreadHandler extends Thread {
 				DataOutputStream toClient = new DataOutputStream(client.getOutputStream());
 				toClient.write(response.toString().getBytes());
 				toClient.write(response.body);
-				System.out.print("[FROM CACHE] ");
 				
-				System.out.println(response.log(request.URI, client.getLocalAddress()));
+				System.out.println("[FROM CACHE]" +response.log(request.URI, client.getLocalAddress()));
 				
 				client.close();
 			}catch(IOException e) {

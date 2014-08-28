@@ -11,15 +11,17 @@ public class CacheHash {
 	}
 	
 	public boolean existsRequest(HttpRequest request) {
-		return this.cache.get(request.toString()) != null;
+		return this.cache.get(request.getURIRequestHost()) != null;
+
 	}
 	
 	public HttpResponse getResponse(HttpRequest request) {
-		return this.cache.get(request.toString());
+		return this.cache.get(request.getURIRequestHost());
+
 	}
 
 	public void add(HttpRequest request, HttpResponse response) {
-		this.cache.put(request.toString(), response);
+		this.cache.put(request.getURIRequestHost(), response);
 		this.size+=response.getContentStored();
 	}
 	

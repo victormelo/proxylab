@@ -102,6 +102,10 @@ public class HttpRequest {
 		return req;
 	}
 	
+	public String getURIRequestHost() {
+		return method + " " + URI + " " + version + CRLF + "Host: " + getHost();
+	}
+	
 	public String log() {
 		return "[REQUEST] URI requested is: " + URI + " method is: " + method;
 	}
